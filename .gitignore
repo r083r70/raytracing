@@ -10,7 +10,7 @@ obj/
 
 # VSCode files
 .vscode/
-coffeepot/
+raytracing/
 thirdparty/glad/glad
 *.code-workspace
 
