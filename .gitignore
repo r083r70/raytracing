@@ -1,0 +1,19 @@
+# Build files
+bin/
+obj/
+
+# VS files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.*
+
+# VSCode files
+.vscode/
+coffeepot/
+thirdparty/glad/glad
+*.code-workspace
+
+# Make files
+Makefile
+*.make
