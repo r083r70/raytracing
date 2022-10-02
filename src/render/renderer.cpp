@@ -7,13 +7,13 @@
 namespace raytracing
 {
     constexpr float s_WorkingDistance = 3.f;
-    constexpr float s_FOV = 3.f;
+    constexpr float s_FOV = 1.f;
 
     Renderer::Renderer()
         : m_Texture(512, 512)
         , m_ImageWidth(512)
         , m_ImageHeight(512)
-        , m_Camera(Vector{ 0.f, 0.f, -s_WorkingDistance }, s_WorkingDistance, s_FOV)
+        , m_Camera(Vector{ 0.f, 0.f, -10.f }, s_WorkingDistance, s_FOV)
         , m_DirectionalLight(Vector{ 1.f, -1.f, 1.f }.normalize())
     {
         m_Spheres.emplace_back(Vector::Zero(), 1);
@@ -40,9 +40,7 @@ namespace raytracing
 
         const size_t width = m_Texture.getWidth();
         const size_t height = m_Texture.getHeight();
-
-        const float doubleInvWidth= 2.f / width;
-        const float doubleInvHeight = 2.f / height;
+        const float maxDimension = std::max(width, height);
 
         const size_t newSize = width * height;
         m_TmpPixels.resize(newSize, 0xFF);
@@ -52,13 +50,12 @@ namespace raytracing
         {
             for (size_t w = 0; w < width; w++)
             {
-                const size_t index = h * width + w;
-
-                float x = (w * doubleInvWidth) - 1;
-                float y = (h * doubleInvHeight) - 1;
+                float x = ((2.f * w) - width) / maxDimension;
+                float y = ((2.f * h) - height) / maxDimension;
                 Vector color = vertexShader(x, y) * 255.f;
 
-                m_Pixels[index] = ((int32_t)color.R << 24)
+                const size_t index = h * width + w;
+                m_TmpPixels[index] = ((int32_t)color.R << 24)
                                    + ((int32_t)color.G << 16)
                                    + ((int32_t)color.B << 8)
                                    + 0xFF;
@@ -113,7 +110,6 @@ namespace raytracing
 
     void Renderer::antiAliasing()
     {
-        return;
         const size_t width = m_Texture.getWidth();
         const size_t height = m_Texture.getHeight();
 
@@ -132,6 +128,9 @@ namespace raytracing
                 {
                     for (size_t ww = std::max(w-1, zero); ww < std::min(w+2, width); ww++)
                     {
+                        if (hh == 0 && ww == 0)
+                            continue;
+
                         const size_t index = hh * width + ww;
                         R += (m_TmpPixels[index] & 0xFF000000) >> 24;
                         G += (m_TmpPixels[index] & 0x00FF0000) >> 16;
