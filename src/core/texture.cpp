@@ -1,7 +1,5 @@
 
 #include "texture.h"
-
-#include "core/log.h"
 #include "glad/glad.h"
 
 namespace raytracing
@@ -25,7 +23,7 @@ namespace raytracing
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, nullptr);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -37,8 +35,8 @@ namespace raytracing
             m_Height = height;
 
             glBindTexture(GL_TEXTURE_2D, m_TextureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, nullptr);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
     }
@@ -46,7 +44,7 @@ namespace raytracing
     void Texture::setData(void* data)
     {
         glBindTexture(GL_TEXTURE_2D, m_TextureID);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, data);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
