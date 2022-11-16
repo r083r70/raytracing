@@ -16,6 +16,15 @@ namespace raytracing
 		Vector Direction;
 	};
 
+	struct HitResult
+	{
+		int32_t ObjectIndex = -1;
+
+		float Distance = 0;
+		Vector Position = Vector{0.f};
+		Vector Normal = Vector{0.f};
+	};
+
     class Renderer : public kettle::Layer
     {
     public:
@@ -37,10 +46,9 @@ namespace raytracing
     private:
         Vector perPixel(float x, float y);
 
-        Vector traceRay(const Ray& ray);
-
-		Vector hit(const Ray& ray, const SphereData& hitObject, float distance);
-        Vector miss(const Ray& ray);
+        HitResult traceRay(const Ray& ray, int32_t bounces = 0);
+		HitResult hit(const Ray& ray, float hitDistance, int32_t hitIndex);
+        HitResult miss(const Ray& ray);
 
     private:
 		static Renderer* s_Instance;

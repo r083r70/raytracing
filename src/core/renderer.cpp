@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <cfloat>
+#include <iostream>
 
 namespace raytracing
 {
@@ -19,10 +20,13 @@ namespace raytracing
         , m_DirectionalLight(Vector{ 1.f, -1.f, 1.f }.normalize())
     {
 		s_Instance = this;
-        m_Spheres.emplace_back(Vector{3, 0, 7}, 1, Vector{1, 0, 0});
-        m_Spheres.emplace_back(Vector{-3, 0, 7}, 0.7, Vector{0, 1, 0});
-        m_Spheres.emplace_back(Vector{0, 3, 7}, 1.3, Vector{0, 0, 1});
-        m_Spheres.emplace_back(Vector{0, -3, 7}, 1.8, Vector{1});
+        //m_Spheres.emplace_back(Vector{3, 0, 7}, 1, Vector{1, 0, 0});
+        //m_Spheres.emplace_back(Vector{-3, 0, 7}, 0.7, Vector{0, 1, 0});
+        //m_Spheres.emplace_back(Vector{0, 3, 7}, 1.3, Vector{0, 0, 1});
+        //m_Spheres.emplace_back(Vector{0, -3, 7}, 1.8, Vector{1});
+
+        m_Spheres.emplace_back(Vector{-2, 0, 0}, 1, Vector{1, 0, 0});
+        m_Spheres.emplace_back(Vector{4, 0, 0}, 2, Vector{0, 0, 1});
     }
 
     void Renderer::start()
@@ -81,14 +85,42 @@ namespace raytracing
         m_Camera.Position = m_Camera.Position + delta;
     }
 
-
 	Vector Renderer::perPixel(float x, float y)
 	{
         const Vector direction{ x * m_Camera.FieldOfView, y * m_Camera.FieldOfView, m_Camera.WorkingDistance };
-        return traceRay({ m_Camera.Position, direction });
+        Ray ray{ m_Camera.Position, direction };
+
+		Vector color{0.f};
+		float multiplayer = 1;
+		
+		int32_t bounces = 5;
+		for (int32_t i = 0; i <= bounces; i++)
+		{
+			HitResult hitResult = traceRay(ray, 3);
+			if (hitResult.ObjectIndex == -1)
+			{
+				Vector skyColor{0.f, 0.f, 0.f};
+				color = color + (skyColor * multiplayer);
+				break;
+			}
+
+			const float lightCos = hitResult.Normal | (- m_DirectionalLight.Direction);
+			Vector sphereColor = m_Spheres[hitResult.ObjectIndex].Color * std::max(lightCos, 0.f);
+			color = color + (sphereColor * multiplayer);
+			multiplayer *= 0.7f;
+
+			ray.Position = hitResult.Position + (hitResult.Normal * 0.001);
+			ray.Direction = ray.Direction - (hitResult.Normal * (ray.Direction | hitResult.Normal) * 2.f);
+		}
+
+		// TODO
+		color.X = std::min(color.X, 1.f);
+		color.Y = std::min(color.Y, 1.f);
+		color.Z = std::min(color.Z, 1.f);
+		return color;
 	}
 
-	Vector Renderer::traceRay(const Ray& ray)
+	HitResult Renderer::traceRay(const Ray& ray, int32_t bounces)
 	{
 		int32_t closestSphereIndex = -1;
 		float closestDistance = FLT_MAX;
@@ -107,33 +139,30 @@ namespace raytracing
 			if (discriminant < 0)
 				continue;
 
-        	const float distance = (- b - std::sqrt(discriminant)) / (2 * a);
-			if (distance < 0)
-				continue;
-
-			if (distance > closestDistance)
-				continue;
-
-			closestSphereIndex = i;
-			closestDistance = distance;
+			const float distance = (- b - std::sqrt(discriminant)) / (2 * a);
+			if (distance > 0 && distance < closestDistance)
+			{
+				closestSphereIndex = i;
+				closestDistance = distance;
+			}
 		}
 
-		return closestSphereIndex != -1
-			? hit(ray, m_Spheres[closestSphereIndex], closestDistance)
-			: miss(ray);
-	}
-	
-	Vector Renderer::hit(const Ray& ray, const SphereData& hitObject, float distance)
-	{
-        Vector hitPosition = ray.Position + (ray.Direction * distance);
-        Vector hitNormal = hitPosition - hitObject.Origin;
+		if (closestSphereIndex == -1)
+			return miss(ray);
 
-        float lightCos = hitNormal.normalize() | (- m_DirectionalLight.Direction);
-        return hitObject.Color * std::max(lightCos, 0.f);
+		return hit(ray, closestDistance, closestSphereIndex);
 	}
 	
-	Vector Renderer::miss(const Ray& ray)
+	HitResult Renderer::hit(const Ray& ray, float hitDistance, int32_t hitIndex)
 	{
-		return Vector{0.7, 0.7, 0.9};
+        Vector hitPosition = ray.Position + (ray.Direction * hitDistance);
+        Vector hitNormal = (hitPosition - m_Spheres[hitIndex].Origin).normalize();
+
+        return HitResult{ hitIndex, hitDistance, hitPosition, hitNormal };
+	}
+	
+	HitResult Renderer::miss(const Ray& ray)
+	{
+		return HitResult();
 	}
 }

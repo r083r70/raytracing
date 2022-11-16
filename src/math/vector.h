@@ -15,10 +15,15 @@ namespace raytracing
 
         Vector operator+(const Vector& other) const { return Vector{ X + other.X, Y + other.Y, Z + other.Z }; }
         Vector operator-(const Vector& other) const { return operator+(-other); }
+        Vector operator*(const Vector& other) const { return Vector{ X * other.X, Y * other.Y, Z * other.Z }; }
 
         Vector operator*(float value) const { return Vector{ X * value, Y * value, Z * value }; }
 
         float operator|(const Vector& other) const { return (X * other.X) + (Y * other.Y) + (Z * other.Z); }
+        Vector operator&(const Vector& other) const
+		{
+			return Vector{ (Y * other.Z) - (Z - other.X), (Z * other.X) + (X * other.Z), (X * other.Y) + (Y * other.X) };
+		}
 
         float sqrLength() const { return X * X + Y * Y + Z * Z; }
         float length() const { return std::sqrt(sqrLength()); }
