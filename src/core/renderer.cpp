@@ -20,13 +20,13 @@ namespace raytracing
         , m_DirectionalLight(Vector{ 1.f, -1.f, 1.f }.normalize())
     {
 		s_Instance = this;
-        //m_Spheres.emplace_back(Vector{3, 0, 7}, 1, Vector{1, 0, 0});
-        //m_Spheres.emplace_back(Vector{-3, 0, 7}, 0.7, Vector{0, 1, 0});
-        //m_Spheres.emplace_back(Vector{0, 3, 7}, 1.3, Vector{0, 0, 1});
-        //m_Spheres.emplace_back(Vector{0, -3, 7}, 1.8, Vector{1});
+        m_Spheres.emplace_back(Vector{3, 0, 7}, 1, Vector{1, 0, 0});
+        m_Spheres.emplace_back(Vector{-3, 0, 7}, 0.7, Vector{0, 1, 0});
+        m_Spheres.emplace_back(Vector{0, 3, 7}, 1.3, Vector{0, 0, 1});
+        m_Spheres.emplace_back(Vector{0, -3, 7}, 1.8, Vector{1});
 
-        m_Spheres.emplace_back(Vector{-2, 0, 0}, 1, Vector{1, 0, 0});
-        m_Spheres.emplace_back(Vector{4, 0, 0}, 2, Vector{0, 0, 1});
+        //m_Spheres.emplace_back(Vector{-2, 0, 0}, 1, Vector{1, 0, 0});
+        //m_Spheres.emplace_back(Vector{4, 0, 0}, 2, Vector{0, 0, 1});
     }
 
     void Renderer::start()
@@ -163,6 +163,6 @@ namespace raytracing
 	
 	HitResult Renderer::miss(const Ray& ray)
 	{
-		return HitResult();
+		return HitResult{};
 	}
 }
